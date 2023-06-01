@@ -49,13 +49,17 @@ Application::~Application()
 
 void Application::draw()
 {
-    SDL_RenderSetDrawColor(renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
     // do    
     draw_body(width / 2, height / 2, 50);
 
     SDL_RenderPresent(renderer);
+}
+
+void Application::draw_body(uint16_t center_x, uint16_t center_y, uint16_t radius)
+{
 }
 
 void Application::run()
