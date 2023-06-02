@@ -4,6 +4,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "../celestial_body/celestial_body.hpp"
+
 class Application
 {
     std::string title;
@@ -14,7 +16,7 @@ class Application
     SDL_Renderer *renderer;
 
     void draw();
-    void draw_body(uint16_t center_x, uint16_t center_y, uint16_t radius);
+    void draw_body(CelestialBody *body);
 
     public:
     Application(uint16_t _width = 800, uint16_t _height = 800, std::string _title = "Solar System");
