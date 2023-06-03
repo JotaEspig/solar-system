@@ -2,6 +2,9 @@
 
 #include <iostream>
 #include <string>
+#include <ctime>
+// TODO Try chrono
+#include <cmath>
 
 #include <SDL2/SDL.h>
 
@@ -49,17 +52,31 @@ Application::~Application()
     SDL_Quit();
 }
 
+SDL_Point Application::get_body_orbital_pos(CelestialBody *body, time_t time)
+{
+    double period = body->period();
+    double rotation = 2 * M_PI * time / period;
+    SDL_Point point;
+    // TODO 200 is HARDCODED it's here just to make it visible in window TODO
+    point.x = 200 * body->semi_major_axis() * sin(rotation);
+    point.y = 200 * body->semi_major_axis() * cos(rotation);
+    return point;
+}
+
 void Application::draw()
 {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-    auto body = new CelestialBody("terra", 380, 0, 10, 0xFFF200, false);
+    auto body = new CelestialBody("sol", 109.178425, 0, 333000, 0xFFF200, false);
+    auto body2 = new CelestialBody("terra", 1, 1, 1, 0xFFFFFF, false);
+    body2->set_central_body(body);
     draw_body(body);
-    delete body;
+    draw_body(body2);
 
     SDL_RenderPresent(renderer);
+    delete body;
 }
 
 void Application::draw_body(CelestialBody *body)
@@ -72,39 +89,52 @@ void Application::draw_body(CelestialBody *body)
     {
         int center_x = width / 2;
         int center_y = height / 2;
-        const int32_t diameter = (body->radius() * 2);
+        draw_circle(center_x, center_y, body->radius());
+    }
+    else
+    {
+        time_t time_ = time(NULL);
+        SDL_Point point = get_body_orbital_pos(body, time_); 
+        // HARDCODED TODO center of the window so it's not possible satellites
+        // orbiting other satellites CHANGE THAT
+        std::cout << time_ << "-> " << point.x << "," << point.y << "\n";
+        draw_circle(width / 2 + point.x, height / 2 + point.y, 20 * body->radius());
+    }
+}
 
-        int32_t x = (body->radius() - 1);
-        int32_t y = 0;
-        int32_t tx = 1;
-        int32_t ty = 1;
-        int32_t error = (tx - diameter);
+void Application::draw_circle(uint16_t center_x, uint16_t center_y, uint16_t radius)
+{
+    const int32_t diameter = (radius * 2);
+    int32_t x = (radius - 1);
+    int32_t y = 0;
+    int32_t tx = 1;
+    int32_t ty = 1;
+    int32_t error = (tx - diameter);
 
-        while (x >= y)
+    while (x >= y)
+    {
+        //  Each of the following renders an octant of the circle
+        SDL_RenderDrawLine(renderer, center_x - x, center_y - y,
+                           center_x + x, center_y - y);
+        SDL_RenderDrawLine(renderer, center_x - x, center_y + y,
+                           center_x + x, center_y + y);
+        SDL_RenderDrawLine(renderer, center_x - y, center_y - x,
+                           center_x + y, center_y - x);
+        SDL_RenderDrawLine(renderer, center_x - y, center_y + x,
+                           center_x + y, center_y + x);
+
+        if (error <= 0)
         {
-            //  Each of the following renders an octant of the circle
-            SDL_RenderDrawLine(renderer, center_x - x, center_y - y,
-                               center_x + x, center_y - y);
-            SDL_RenderDrawLine(renderer, center_x - x, center_y + y,
-                               center_x + x, center_y + y);
-            SDL_RenderDrawLine(renderer, center_x - y, center_y - x,
-                               center_x + y, center_y - x);
-            SDL_RenderDrawLine(renderer, center_x - y, center_y + x,
-                               center_x + y, center_y + x);
+            ++y;
+            error += ty;
+            ty += 2;
+        }
 
-            if (error <= 0)
-            {
-                ++y;
-                error += ty;
-                ty += 2;
-            }
-
-            if (error > 0)
-            {
-                --x;
-                tx += 2;
-                error += (tx - diameter);
-            }
+        if (error > 0)
+        {
+            --x;
+            tx += 2;
+            error += (tx - diameter);
         }
     }
 }
