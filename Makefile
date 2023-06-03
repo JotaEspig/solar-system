@@ -2,7 +2,7 @@ CC = g++
 CC_FLAGS = -Wall \
 		   -lSDL2 \
 		   -lSDL2main
-TARGET = tictactoe
+TARGET = solar-system
 DIR_TARGET = bin
 SRC = $(shell find ./src -name "*.cpp")
 
