@@ -22,6 +22,10 @@ Application::Application(uint16_t _width, uint16_t _height, std::string _title)
     width = _width;
     height = _height;
     title = _title;
+    distance_scale = 200;
+    time_scale = 300;
+    principal_body_scale = 0.5;
+    satellites_scale = 2;
 
     window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED, width, height,
@@ -56,12 +60,12 @@ SDL_Point Application::get_body_orbital_pos(CelestialBody *body,
                                             long double seconds)
 {
     double period = body->period();
-    double rotation = 2 * M_PI * seconds / period;
+    double rotation = time_scale * 2 * M_PI * seconds / period;
     std::cout << period << "\n";
     SDL_Point point;
     // TODO 200 is HARDCODED it's here just to make it visible in window TODO
-    point.x = 200 * body->semi_major_axis() * sin(rotation);
-    point.y = 200 * body->semi_major_axis() * cos(rotation);
+    point.x = distance_scale * body->semi_major_axis() * sin(rotation);
+    point.y = distance_scale * body->semi_major_axis() * cos(rotation);
     return point;
 }
 
@@ -71,14 +75,27 @@ void Application::draw()
     SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-    auto body = new CelestialBody("sol", 109.178425, 0, 333000, 0xFFF200, false);
-    auto body2 = new CelestialBody("terra", 1, 1, 1, 0xFFFFFF, false);
+    auto body = new CelestialBody("sol", 109.17, 0, 333000, 0xFFF200, false);
+    auto body2 = new CelestialBody("terra", 1, 1, 1, 0x00FFFF, false);
+    auto body3 = new CelestialBody("Jupiter", 11, 3, 318, 0xFFA500, false);
+    auto body4 = new CelestialBody("marte", 0.52, 1.5, 0.1, 0xFF0000, false);
+    auto body5 = new CelestialBody("Venus", 0.94, 0.72, 0.815, 0xFFA500, false);
     body2->set_central_body(body);
+    body3->set_central_body(body);
+    body4->set_central_body(body);
+    body5->set_central_body(body);
     draw_body(body);
     draw_body(body2);
+    draw_body(body3);
+    draw_body(body4);
+    draw_body(body5);
 
     SDL_RenderPresent(renderer);
     delete body;
+    delete body2;
+    delete body3;
+    delete body4;
+    delete body5;
 }
 
 void Application::draw_body(CelestialBody *body)
@@ -91,7 +108,7 @@ void Application::draw_body(CelestialBody *body)
     {
         int center_x = width / 2;
         int center_y = height / 2;
-        draw_circle(center_x, center_y, body->radius());
+        draw_circle(center_x, center_y, principal_body_scale * body->radius());
     }
     else
     {
@@ -102,7 +119,7 @@ void Application::draw_body(CelestialBody *body)
         // HARDCODED TODO center of the window so it's not possible satellites
         // orbiting other satellites CHANGE THAT
         std::cout << millis << "-> " << point.x << "," << point.y << "\n";
-        draw_circle(width / 2 + point.x, height / 2 + point.y, 20 * body->radius());
+        draw_circle(width / 2 + point.x, height / 2 + point.y, satellites_scale * body->radius());
     }
 }
 

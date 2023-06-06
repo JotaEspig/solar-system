@@ -12,6 +12,10 @@ class Application
     std::string title;
     uint16_t width;
     uint16_t height;
+    double distance_scale;
+    double time_scale;
+    double principal_body_scale;
+    double satellites_scale;
     SDL_Window *window;
     SDL_Surface *screen_surface;
     SDL_Renderer *renderer;
