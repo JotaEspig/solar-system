@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include <ctime>
+#include <chrono>
 // TODO Try chrono
 #include <cmath>
 
@@ -52,10 +52,12 @@ Application::~Application()
     SDL_Quit();
 }
 
-SDL_Point Application::get_body_orbital_pos(CelestialBody *body, time_t time)
+SDL_Point Application::get_body_orbital_pos(CelestialBody *body, 
+                                            long double seconds)
 {
     double period = body->period();
-    double rotation = 2 * M_PI * time / period;
+    double rotation = 2 * M_PI * seconds / period;
+    std::cout << period << "\n";
     SDL_Point point;
     // TODO 200 is HARDCODED it's here just to make it visible in window TODO
     point.x = 200 * body->semi_major_axis() * sin(rotation);
@@ -93,11 +95,13 @@ void Application::draw_body(CelestialBody *body)
     }
     else
     {
-        time_t time_ = time(NULL);
-        SDL_Point point = get_body_orbital_pos(body, time_); 
+        auto now = std::chrono::system_clock::now();
+        auto duration = now.time_since_epoch();
+        long double millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        SDL_Point point = get_body_orbital_pos(body, millis / 1000); 
         // HARDCODED TODO center of the window so it's not possible satellites
         // orbiting other satellites CHANGE THAT
-        std::cout << time_ << "-> " << point.x << "," << point.y << "\n";
+        std::cout << millis << "-> " << point.x << "," << point.y << "\n";
         draw_circle(width / 2 + point.x, height / 2 + point.y, 20 * body->radius());
     }
 }

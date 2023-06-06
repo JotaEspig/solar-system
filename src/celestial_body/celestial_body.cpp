@@ -25,6 +25,7 @@ CelestialBody::~CelestialBody()
 double CelestialBody::period()
 {
     // Kepler's third law
+    // TODO checks is giving the right result
     return sqrt((4 * pow(M_PI, 2) * pow(_semi_major_axis, 3))
                 / (GRAVITY * _central_body->_mass));
 }

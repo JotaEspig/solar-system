@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <ctime>
+#include <chrono>
 
 #include <SDL2/SDL.h>
 
@@ -16,7 +16,7 @@ class Application
     SDL_Surface *screen_surface;
     SDL_Renderer *renderer;
 
-    SDL_Point get_body_orbital_pos(CelestialBody *body, time_t time);
+    SDL_Point get_body_orbital_pos(CelestialBody *body, long double);
     void draw();
     void draw_body(CelestialBody *body);
     void draw_circle(uint16_t center_x, uint16_t center_y, uint16_t radius);
