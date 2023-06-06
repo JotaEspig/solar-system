@@ -63,7 +63,6 @@ SDL_Point Application::get_body_orbital_pos(CelestialBody *body,
     double rotation = time_scale * 2 * M_PI * seconds / period;
     std::cout << period << "\n";
     SDL_Point point;
-    // TODO 200 is HARDCODED it's here just to make it visible in window TODO
     point.x = distance_scale * body->semi_major_axis() * sin(rotation);
     point.y = distance_scale * body->semi_major_axis() * cos(rotation);
     return point;
@@ -116,8 +115,6 @@ void Application::draw_body(CelestialBody *body)
         auto duration = now.time_since_epoch();
         long double millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
         SDL_Point point = get_body_orbital_pos(body, millis / 1000); 
-        // HARDCODED TODO center of the window so it's not possible satellites
-        // orbiting other satellites CHANGE THAT
         std::cout << millis << "-> " << point.x << "," << point.y << "\n";
         draw_circle(width / 2 + point.x, height / 2 + point.y, satellites_scale * body->radius());
     }
