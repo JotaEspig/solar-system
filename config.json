@@ -16,6 +16,15 @@
                     "color": 255,
                     "emit_light": false,
                     "satellites": []
+                },
+                {
+                    "name": "mars",
+                    "radius": 0.5,
+                    "semi_major_axis": 1.5,
+                    "mass": 0.103,
+                    "color": 16711680,
+                    "emit_light": false,
+                    "satellites": []
                 }
             ]
         }
