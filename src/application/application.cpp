@@ -3,10 +3,11 @@
 #include <iostream>
 #include <string>
 #include <chrono>
-// TODO Try chrono
 #include <cmath>
+#include <vector>
 
 #include <SDL2/SDL.h>
+#include "../rapidjson/document.h"
 
 #include "../celestial_body/celestial_body.hpp"
 
@@ -18,6 +19,65 @@ Ver esse video para aplicar luz do sol aos planetas
 */
 
 Application::Application(uint16_t _width, uint16_t _height, std::string _title)
+{
+    init(_width, _height, _title);
+}
+
+std::vector<CelestialBody*> read_satellites(const rapidjson::Value &central_body_json)
+{
+    const rapidjson::Value &bodies_json = central_body_json["satellites"];
+    std::vector<CelestialBody*> vec;
+
+    for (rapidjson::SizeType i = 0; i < bodies_json.Size(); i++)
+    {
+        const rapidjson::Value &body_json = bodies_json[i];
+        auto body = new CelestialBody(body_json["name"].GetString(),
+                                      body_json["radius"].GetDouble(),
+                                      body_json["semi_major_axis"].GetDouble(),
+                                      body_json["mass"].GetDouble(),
+                                      body_json["color"].GetInt(),
+                                      body_json["emit_light"].GetBool());
+        vec.push_back(body);
+    }
+
+    return vec;
+}
+
+Application::Application(rapidjson::Document &doc, uint16_t _width,
+                         uint16_t _height, std::string _title)
+{
+    init(_width, _height, _title);
+    // TODO Fix, because it's not adding earth
+    const rapidjson::Value &bodies_json = doc["bodies"];
+    for (rapidjson::SizeType i = 0; i < bodies_json.Size(); i++)
+    {
+        const rapidjson::Value &body_json = bodies_json[i];
+        auto body = new CelestialBody(body_json["name"].GetString(),
+                                      body_json["radius"].GetDouble(),
+                                      body_json["semi_major_axis"].GetDouble(),
+                                      body_json["mass"].GetDouble(),
+                                      body_json["color"].GetInt(),
+                                      body_json["emit_light"].GetBool());
+
+        body->set_satellites(read_satellites(body_json));
+        for (auto &e : body->satellites())
+            e->set_central_body(body);
+
+        _bodies.push_back(body);
+    }
+}
+
+Application::~Application()
+{
+    for (auto &e: _bodies)
+        delete e;
+
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_Quit();
+}
+
+void Application::init(uint16_t _width, uint16_t _height, std::string _title)
 {
     width = _width;
     height = _height;
@@ -49,13 +109,6 @@ Application::Application(uint16_t _width, uint16_t _height, std::string _title)
     SDL_UpdateWindowSurface(window);
 }
 
-Application::~Application()
-{
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_Quit();
-}
-
 SDL_Point Application::get_body_orbital_pos(CelestialBody *body, 
                                             long double seconds)
 {
@@ -74,27 +127,10 @@ void Application::draw()
     SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-    auto body = new CelestialBody("sol", 109.17, 0, 333000, 0xFFF200, false);
-    auto body2 = new CelestialBody("terra", 1, 1, 1, 0x00FFFF, false);
-    auto body3 = new CelestialBody("Jupiter", 11, 3, 318, 0xFFA500, false);
-    auto body4 = new CelestialBody("marte", 0.52, 1.5, 0.1, 0xFF0000, false);
-    auto body5 = new CelestialBody("Venus", 0.94, 0.72, 0.815, 0xFFA500, false);
-    body2->set_central_body(body);
-    body3->set_central_body(body);
-    body4->set_central_body(body);
-    body5->set_central_body(body);
-    draw_body(body);
-    draw_body(body2);
-    draw_body(body3);
-    draw_body(body4);
-    draw_body(body5);
+    for (auto &body: _bodies)
+        draw_body(body);
 
     SDL_RenderPresent(renderer);
-    delete body;
-    delete body2;
-    delete body3;
-    delete body4;
-    delete body5;
 }
 
 void Application::draw_body(CelestialBody *body)
@@ -155,6 +191,26 @@ void Application::draw_circle(uint16_t center_x, uint16_t center_y, uint16_t rad
             error += (tx - diameter);
         }
     }
+}
+
+void Application::set_distance_scale(double value)
+{
+    distance_scale = value;
+}
+
+void Application::set_time_scale(double value)
+{
+    time_scale = value;
+}
+
+void Application::set_principal_body_scale(double value)
+{
+    principal_body_scale = value;
+}
+
+void Application::set_satellites_scale(double value)
+{
+    satellites_scale = value;
 }
 
 void Application::run()

@@ -1,0 +1,23 @@
+{
+    "bodies": [
+        {
+            "name": "sun",
+            "radius": 109,
+            "semi_major_axis": 0,
+            "mass": 333000,
+            "color": 16773632,
+            "emit_light": true,
+            "satellites": [
+                {
+                    "name": "earth",
+                    "radius": 1,
+                    "semi_major_axis": 1,
+                    "mass": 1,
+                    "color": 255,
+                    "emit_light": false,
+                    "satellites": []
+                }
+            ]
+        }
+    ]
+}
