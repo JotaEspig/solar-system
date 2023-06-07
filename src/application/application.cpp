@@ -23,7 +23,7 @@ Application::Application(uint16_t _width, uint16_t _height, std::string _title)
     init(_width, _height, _title);
 }
 
-std::vector<CelestialBody*> read_satellites(const rapidjson::Value &central_body_json)
+static std::vector<CelestialBody*> read_satellites(const rapidjson::Value &central_body_json)
 {
     const rapidjson::Value &bodies_json = central_body_json["satellites"];
     std::vector<CelestialBody*> vec;
@@ -64,6 +64,7 @@ Application::Application(rapidjson::Document &doc, uint16_t _width,
             e->set_central_body(body);
 
         _bodies.push_back(body);
+        save_satellites(body);
     }
 }
 
@@ -108,6 +109,19 @@ void Application::init(uint16_t _width, uint16_t _height, std::string _title)
                  SDL_MapRGB(screen_surface->format, 0x00, 0x00, 0x00));
     SDL_UpdateWindowSurface(window);
 }
+
+void Application::save_satellites(CelestialBody *body)
+{
+    if (body->satellites().size() > 0)
+    {
+        for (auto &e : body->satellites())
+        {
+            _bodies.push_back(e);
+            save_satellites(e);
+        }
+    }
+}
+
 
 SDL_Point Application::get_body_orbital_pos(CelestialBody *body, 
                                             long double seconds)

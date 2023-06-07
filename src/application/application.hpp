@@ -35,6 +35,7 @@ class Application
                 uint16_t _height = 800, std::string _title = "Solar System");
     ~Application();
     void init(uint16_t _width, uint16_t _height, std::string _title);
+    void save_satellites(CelestialBody *body);
     void set_distance_scale(double value);
     void set_time_scale(double value);
     void set_principal_body_scale(double value);
